@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>家計簿</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+</head>
+<body>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
+
+<header>家計簿</header>
+
+<table>
+    <tr>
+        <th>日付</th>
+        <th>カテゴリ</th>
+        <th>メモ</th>
+        <th>金額</th>
+    </tr>
+    <tr class="no-border" contenteditable="true">
+        <td >&nbsp;</td>
+        <td >&nbsp;</td>
+        <td >&nbsp;</td>
+        <td >&nbsp;</td>
+    </tr>
+</table>
+
+<video id="video" width="400" height="300" autoplay playsinline style="display:none;"></video>
+<canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+
+<div class="buttons">
+    <button id="scanButton" onclick="scanData()">レシート<br>読み取り</button>
+    <button onclick="submitData()">確定</button>
+</div>
+
+<nav>
+  <a href="input.html">入力</a>
+  <a href="log.html">ログ</a>
+  <a href="report.html">レポート</a>
+  <a href="menu.html">メニュー</a>
+</nav>
+
+</body>
+</html>
