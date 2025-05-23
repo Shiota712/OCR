@@ -6,11 +6,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 </head>
 <body>
-    <script src="{{ url_for('static', filename='index.js') }}"></script>
 
 <header>家計簿</header>
 
-<table>
+<table id="editableTable">
     <tr>
         <th>日付</th>
         <th>カテゴリ</th>
@@ -29,7 +28,9 @@
 <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
 
 <div class="buttons">
-    <button id="scanButton" onclick="scanData()">レシート<br>読み取り</button>
+    <button onclick="showOptions()" id="loadButton">レシート<br>読み込み</button>
+    <!-- 非表示のinput -->
+    <input type="file" accept="image/" id="uploadInput" style="display:none">
     <button onclick="submitData()">確定</button>
 </div>
 
@@ -40,5 +41,7 @@
   <a href="menu.html">メニュー</a>
 </nav>
 
+    <script src="{{ url_for('static', filename='index.js') }}" defer></script>
 </body>
+
 </html>
