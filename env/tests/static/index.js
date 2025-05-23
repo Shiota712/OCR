@@ -2,42 +2,46 @@ let step = 0;
 let video = null;
 let canvas = null;
 let ctx = null;
-let imageData = null;
 
-//jsonデータを表示
-fetch('/upload')
-    .then(response => response.json())
-    .then(data => {
-        const table = document.getElementById('editableTable');
-        let rows = data.map(row =>
-            '<tr>' + row.map(cell => '<td>${cell}</td>').join('') + '</tr>'
-        ).join('');
-        table.innerHTML = rows;
-    });
-
-document.addEventListener("DOMContentLoaded", function() { 
+document.addEventListener("DOMContentLoaded", () => {
+    fetch('/receipts/session-user')
+        .then(res => {
+            if (!res.ok) throw new Error("ログインしていません");
+            return res.json();
+        })
+        .then(data => {
+            document.getElementById('username').textContent = data.username;
+        })
+        .catch(err => {
+            console.log(err.message);
+            document.getElementById('username').textContent = 'ゲスト';
+        });
+    
     const table = document.getElementById('editableTable');
-
-    //セル編集時
-    function onCellEdit(e) {
-        console.log("edit");
-        const lastRow = table.rows[table.rows.length -1];
-        if(e.target.parentElement === lastRow){addRow();}
-    }
-
-    //新規セル追加
-    function addRow() {
-        const row = table.insertRow();
-        for(let i=0; i<4; i++){
-            const cell = row.insertCell();
-            cell.innerHTML = "&nbsp;";
-            cell.contentEditable = "true";
-            cell.addEventListener("input", onCellEdit);  //新規セルにonCellEditを追加
-        }
-        console.log("addRow");
-    }
-    addRow();
+    addRow();  // 最初の行追加
 });
+
+// 新しい行を追加
+function addRow() {
+    const table = document.getElementById('editableTable');
+    const row = table.insertRow();
+    for (let i = 0; i < 5; i++) {
+        const cell = row.insertCell();
+        cell.innerHTML = "&nbsp;";
+        cell.contentEditable = "true";
+        cell.addEventListener("input", onCellEdit);
+    }
+}
+
+// 編集されたときに最終行なら新しい行を追加
+function onCellEdit(e) {
+    const table = document.getElementById('editableTable');
+    const lastRow = table.rows[table.rows.length - 1];
+    if (e.target.parentElement === lastRow) {
+        addRow();
+    }
+}
+
 
 // レシート読み込み
 function showOptions() {
@@ -51,35 +55,22 @@ function showOptions() {
   }
 }
 
-document.getElementById('uploadInput').addEventListener('change', sendImage);
+document.getElementById('uploadInput').addEventListener('change', uploadImage);
 
-// 画像ファイルを送信
-function sendImage(event) {
+// 画像をアップロード
+function uploadImage(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onloadend = function () {
-        const imageData = reader.result; // Base64 データ (data:image/jpeg;base64,...)
-        fetch("/receipts/upload", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: imageData })
-        })
-        .then(res => res.text())
-        .then(data => {
-            alert("送信完了");
-            console.log(data);
-        })
-        .catch(err => {
-            alert("送信エラー: " + err);
-        });
+    reader.onloadend = () => {
+        const imageData = reader.result;
+        uploadImageToServer(imageData);
     };
     reader.readAsDataURL(file);
 }
 
-
-// 撮影して送信
+// 撮影してアップロード
 function scanData() {
     const button = document.getElementById('loadButton');
     step = (step + 1) % 2;
@@ -103,8 +94,7 @@ function scanData() {
             .catch(err => {
                 alert("カメラ起動エラー: " + err);
             });
-    }
-    else if (step === 0) {
+    } else {
         button.innerHTML = 'レシート<br>読み取り';
 
         if (!video || !canvas || !ctx) {
@@ -115,27 +105,66 @@ function scanData() {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        imageData = canvas.toDataURL("image/png");
 
+        const imageData = canvas.toDataURL("image/png");
         alert("写真を撮影しました！");
-
-        //Flaskに送信
-        fetch("/receipts/upload", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: imageData })
-        })
-        .then(res => res.text())
-        .then(data => {
-            alert("画像をサーバーに送信しました！");
-            console.log(data);
-        })
-        .catch(err => {
-            alert("送信エラー: " + err);
-        });
+        uploadImageToServer(imageData);
     }
 }
 
+// 画像ファイルを送信
+async function uploadImageToServer(imageData) {
+    try {
+        const response = await fetch("/receipts/upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: imageData })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "アップロードに失敗しました");
+
+        populateTable(data);
+
+    } catch (err) {
+        alert("送信エラー: " + err.message);
+    }
+}
+
+// jsonデータをテーブルに反映する
+function populateTable(data) {
+    const tableBody = document.getElementById('editableTable').querySelector('tbody');
+    const rows = tableBody.querySelectorAll('tr');
+
+    // 不必要な行を削除
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const isEmpty = [...cells].every(cell => cell.innerText.trim() === "" || cell.innerText.trim() === "\u00A0"); // 空文字または&nbsp;
+
+        if (isEmpty) {
+            row.remove();
+        }
+    });
+
+    const today = new Date().toISOString().split('T')[0];
+
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        row.setAttribute("contenteditable", "true");
+        row.innerHTML = `
+            <td>${today}</td>
+            <td>${item.item_name}</td>
+            <td>${item.category}</td>
+            <td>${item.note}</td>
+            <td>${item.price}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+    addRow();
+}
+
+
+// 内容を確定し、保存、ログに表示
 function submitData() {
     const rows = document.querySelectorAll("#editableTable tr");
     const data = [];
@@ -151,19 +180,16 @@ function submitData() {
         }
     }
 
-    // Pythonに送信する（例: /submit にPOST）
     fetch("/receipts/submit", {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ records: data })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ records: data })
     })
-    .then(response => {
-    if (response.ok) {
-        alert("送信成功");
-    } else {
-        alert("送信失敗");
-    }
+    .then(res => {
+        alert(res.ok ? "送信成功" : "送信失敗");
     });
+
+    // Tableをリセット
+    document.querySelector('#editableTable tbody').innerHTML = '';
+    addRow();
 }

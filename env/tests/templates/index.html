@@ -7,21 +7,25 @@
 </head>
 <body>
 
-<header>入力</header>
+<header>
+    <a>入力</a>
+    <a>ユーザー：<span id = username>ゲスト</span></a>
+</header>
 
 <table id="editableTable">
+  <thead>
     <tr>
-        <th>日付</th>
-        <th>カテゴリ</th>
-        <th>メモ</th>
-        <th>金額</th>
+      <th>日付</th>
+      <th>商品名</th>
+      <th>カテゴリ</th>
+      <th>メモ</th>
+      <th>金額</th>
     </tr>
+  </thead>
+  <tbody>
     <tr class="no-border" contenteditable="true">
-        <td >&nbsp;</td>
-        <td >&nbsp;</td>
-        <td >&nbsp;</td>
-        <td >&nbsp;</td>
     </tr>
+  </tbody>
 </table>
 
 <video id="video" width="400" height="300" autoplay playsinline style="display:none;"></video>
@@ -36,7 +40,7 @@
 
 <nav>
     <a>入力</a>
-    <a href="log.html">ログ</a>
+    <a href="{{ url_for('log.jumpToLog') }}">ログ</a>
     <!-- 非表示のinput -->
     <a>レポート</a> 
     <a>メニュー</a>

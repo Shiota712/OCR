@@ -1,6 +1,7 @@
 from flask import Flask, redirect
 from auth.routes import auth_bp
 from receipts.routes import receipts_bp 
+from log.routes import log_bp 
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'  # セッション用のキー
@@ -8,6 +9,7 @@ app.secret_key = 'your-secret-key'  # セッション用のキー
 # Blueprint登録
 app.register_blueprint(auth_bp)
 app.register_blueprint(receipts_bp)
+app.register_blueprint(log_bp)
 
 @app.route('/')
 def home():
