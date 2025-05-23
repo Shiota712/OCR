@@ -14,9 +14,7 @@ pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH')
 
 # Gemini
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = genai.GenerativeModel("gemini-pro")
-
-# リストを追加
+model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
 # レシート読み取り
 @receipts_bp.route('/upload', methods=['POST'])
@@ -34,7 +32,6 @@ def upload_receipt():
         header, encoded = image_data.split(",", 1)
         image_binary = base64.b64decode(encoded.encode('utf-8'))
         image = Image.open(BytesIO(image_binary))
-        image.show()
 
         # 画像解析
         ocr_text = extract_text_from_image(image)   
@@ -72,9 +69,11 @@ def extract_text_from_image(image):
     return pytesseract.image_to_string(image, lang="jpn")
 
 # Geminiに解析依頼
+# プロンプトは英語で書く
 def parse_receipt_with_gemini(ocr_text):
     prompt = f"""
-次のレシートの内容から、商品名と金額を抽出して、以下の形式のJSONリストにしてください。
+次のレシートの内容から、商品名、カテゴリ、金額を抽出して、以下の形式のJSONリストにしてください。
+カテゴリは次から選び、該当しない場合は「その他」を入力してください。
 
 [{{"商品名": "xxx", "金額": xxx}}, ...]
 

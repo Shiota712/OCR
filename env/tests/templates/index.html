@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<header>家計簿</header>
+<header>入力</header>
 
 <table id="editableTable">
     <tr>
@@ -35,13 +35,13 @@
 </div>
 
 <nav>
-  <a href="input.html">入力</a>
-  <a href="log.html">ログ</a>
-  <a href="report.html">レポート</a>
-  <a href="menu.html">メニュー</a>
+    <a>入力</a>
+    <a href="log.html">ログ</a>
+    <!-- 非表示のinput -->
+    <a>レポート</a> 
+    <a>メニュー</a>
 </nav>
 
     <script src="{{ url_for('static', filename='index.js') }}" defer></script>
 </body>
-
 </html>
