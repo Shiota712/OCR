@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>家計簿</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='input.css') }}">
+</head>
+<body>
+
+<header>
+    <div>記録</div>
+    <div id="username">ユーザー：{{ username or 'ゲスト' }}</div>
+</header>
+
+<div>合計支出金：<span id="totalPrice">0</span>円</div>
+<div>残高：<span id="balance">0</span>円</div>
+
+<table id="editableTable">
+  <thead>
+    <tr>
+      <th>日付</th>
+      <th>商品名</th>
+      <th>カテゴリ</th>
+      <th>メモ</th>
+      <th>金額</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="no-border">
+    </tr>
+  </tbody>
+</table>
+
+<nav>
+    <a href="{{ url_for('input.input') }}">入力</a>
+    <a>記録</a>
+    <!-- 非表示のinput -->
+    <a>レポート</a> 
+    <a>メニュー</a>
+</nav>
+
+    <script src="{{ url_for('static', filename='record.js') }}" defer></script>
+</body>
+</html>
