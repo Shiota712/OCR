@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head><title>ログイン</title></head>
+<body>
+  <h2>ログインまたは新規登録</h2>
+
+  <form method="POST">
+    <label>ユーザー名:</label><br>
+    <input type="text" name="username" required><br>
+    <label>パスワード:</label><br>
+    <input type="password" name="password" required><br><br>
+    <button type="submit">送信</button>
+  </form>
+  
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+</body>
+</html>
